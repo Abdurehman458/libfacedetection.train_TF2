@@ -19,22 +19,14 @@ from utils import decode
 from timer import Timer
 from yufacedetectnet import YuFaceDetectNet
 
-def str2bool(v):
-    if v.lower() in ['on', 'yes', 'true']:
-        return True
-    elif v.lower() in ['off', 'no', 'false']:
-        return False
-    else:
-        raise NotImplementedError
-
 parser = argparse.ArgumentParser(description='Face and Landmark Detection')
 
 parser.add_argument('-m', '--trained_model', default='weights/yunet_final.pth',
                     type=str, help='Trained state_dict file path to open')
+parser.add_argument('-d', '--image_dim', default=320,
+                    type=int, help='Input image width')
 parser.add_argument('-o', '--output_name', default='YuFaceDetectNet',
                     type=str, help='The output ONNX file, trained parameters inside')
-parser.add_argument('--enable_dynamic_axes', default=True,
-                    type=str2bool, help='Enable dynamic axes for ONNX model.')
 args = parser.parse_args()
 
 def check_keys(model, pretrained_state_dict):
@@ -82,19 +74,16 @@ if __name__ == '__main__':
 
     print('Finished loading model!')
     
-    img = torch.randn(1, 3, 480, 640, requires_grad=False)
+    height = 0.75 * args.image_dim
+    img_raw = np.zeros((args.image_dim, int(height), 3), np.uint8)
+    img = np.float32(img_raw)
+
+    img = img.transpose(2, 0, 1)
+    img = torch.from_numpy(img).unsqueeze(0)
     img = img.to(torch.device('cpu'))
 
     input_names = ['input']
     output_names = ['loc', 'conf', 'iou']
-    if args.enable_dynamic_axes:
-        dynamic_axes = {'input': {0: 'batch_size', 2: 'height', 3: 'width'},
-                        'loc':   {0: 'batch_size', 1: 'channel', 2: 'height', 3: 'width'},
-                        'conf':  {0: 'batch_size', 1: 'channel', 2: 'height', 3: 'width'},
-                        'iou':   {0: 'batch_size', 1: 'channel', 2: 'height', 3: 'width'}}
-        output_path = os.path.join('./onnx', args.output_name + '.onnx')
-        torch.onnx.export(net, img, output_path, input_names=input_names, output_names=output_names, dynamic_axes=dynamic_axes)
-    else:
-        output_path = os.path.join('./onnx', args.output_name + '_' + str(args.image_dim) + '.onnx')
-        torch.onnx.export(net, img, output_path, input_names=input_names, output_names=output_names)
+    output_path = os.path.join('./onnx', args.output_name + '_' + str(args.image_dim) + '.onnx')
+    torch.onnx.export(net, img, output_path, input_names=input_names, output_names=output_names)
     print('Finished exporing model to ' + output_path)

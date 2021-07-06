@@ -17,7 +17,7 @@ class WIDERFace(data.Dataset):
         self.device = device
 
         self.widerface_img_paths = {
-            'val':  osp.join(self.widerface_root, 'WIDER_val', 'images'),
+            'val':  osp.join(self.widerface_root,  'images'),
             'test': osp.join(self.widerface_root, 'WIDER_test', 'images')
         }
 

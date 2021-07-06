@@ -4,6 +4,7 @@ from __future__ import print_function
 import os
 import sys
 import torch
+from torch._C import dtype
 import torch.optim as optim
 import torch.backends.cudnn as cudnn
 import torch.utils.data as data
@@ -13,6 +14,7 @@ import time
 import datetime
 import math
 import numpy as np
+import cv2
 
 from config import cfg
 
@@ -22,10 +24,10 @@ from data import FaceRectLMDataset, detection_collate
 from multibox_loss import MultiBoxLoss
 from prior_box import PriorBox
 from yufacedetectnet import YuFaceDetectNet
-
-import resource
-rlimit = resource.getrlimit(resource.RLIMIT_NOFILE)
-resource.setrlimit(resource.RLIMIT_NOFILE, (20000, rlimit[1]))
+from torchsummary import summary
+# import resource
+# rlimit = resource.getrlimit(resource.RLIMIT_NOFILE)
+# resource.setrlimit(resource.RLIMIT_NOFILE, (20000, rlimit[1]))
 
 parser = argparse.ArgumentParser(description='YuMobileNet Training')
 parser.add_argument('--training_face_rect_dir', default='../../data/WIDER_FACE_rect', help='Training dataset directory')
@@ -61,9 +63,8 @@ training_face_rect_dir = args.training_face_rect_dir
 training_face_landmark_dir = args.training_face_landmark_dir
 
 net = YuFaceDetectNet('train', img_dim)
-print("Printing net...")
-#print(net)
-
+# print("Printing net...")
+# print(net)
 if args.resume_net is not None:
     print('Loading resume network...')
     state_dict = torch.load(args.resume_net)
@@ -86,7 +87,8 @@ if len(gpu_ids) > 1 :
 device = torch.device('cuda:'+str(gpu_ids[0]))
 cudnn.benchmark = True
 net = net.to(device)
-
+# summary(net, (3, 320, 320))
+# exit()
 optimizer = optim.SGD(net.parameters(), lr=args.lr, momentum=momentum, weight_decay=weight_decay)
 criterion = MultiBoxLoss(num_classes, 0.35, True, 0, True, 3, 0.35, False, False)
 
@@ -104,19 +106,21 @@ def train():
     #load the two dataset for face rectangles and landmarks respectively
     print('Loading Dataset...')
     dataset_rect = FaceRectLMDataset(training_face_rect_dir, img_dim, rgb_mean)
-    dataset_landmark = FaceRectLMDataset(training_face_landmark_dir, img_dim, rgb_mean)
-    
+    # dataset_landmark = FaceRectLMDataset(training_face_landmark_dir, img_dim, rgb_mean)
+    # img = dataset_rect[0]
+    # print(img[0].shape)
+    # exit()
     batch_size = args.batch_size
 
     for epoch in range(args.resume_epoch, max_epoch):
-        if epoch < 100 :
-            with_landmark = False
-        else:
-            with_landmark = (epoch % 2 == 1)
+        # if epoch < 100 :
+        with_landmark = False
+        # else:
+        #     with_landmark = (epoch % 2 == 1)
 
         dataset = dataset_rect
-        if with_landmark:
-            dataset = dataset_landmark
+        # if with_landmark:
+        #     dataset = dataset_landmark
 
         train_loader = data.DataLoader(
             dataset=dataset,
@@ -146,27 +150,57 @@ def train():
             # load train data
             #images, targets = next(batch_iterator)
             images, targets = one_batch_data
-            images = images.to(device)
+            # print(targets[0])
+            # print(targets[0][0][0])
+            # exit()
+            # x = images.numpy()
+            # print(x.shape)
+            # x = np.squeeze(x)
+            # print(x.shape)
+            # x = x.astype(np.uint8)
+            # x = np.transpose(x, (1, 2, 0))
+            # print(x.shape)
+            # cv2.imshow("as",x)
+            # if cv2.waitKey(0) & 0xFF == ord('q'):
+            #     break
+
+            ##*******************************##
+            # images = cv2.imread("/home/arm/Projects/LibFaceDetection/libfacedetection.train/tasks/task1/test1.jpg")
+            # # cv2.imshow("",images)
+            # # if cv2.waitKey(0) & 0xFF == ord('q'):
+            # #     break
+            # images=images/255
+            # images = cv2.resize(images,(320,320))
+            # images = torch.from_numpy(images)
+            # images = images.permute(2, 0, 1).unsqueeze(0)
+            # target = [0.4238,0.1666,0.6679,0.6380,1]
+            # target = torch.Tensor([target])
+            # targets = [target]
+            ##*********************************##
+
+            images = images.to(device,dtype=torch.float)    
             targets = [anno.to(device) for anno in targets]
 
             # forward
             out = net(images)
+            # print(out)
+            # exit()
             # loss
-            loss_l, loss_lm, loss_c, loss_iou = criterion(out, priors, targets)
+            loss_l, loss_c, loss_iou = criterion(out, priors, targets)
 
-            if with_landmark:
-                loss = args.lambda_bbox * loss_l + loss_lm + loss_c + args.lambda_iouhead * loss_iou
-            else:
-                loss = args.lambda_bbox * loss_l + loss_c + args.lambda_iouhead * loss_iou
-
+            # if with_landmark:
+            # loss = args.lambda_bbox * loss_l + loss_lm + loss_c + args.lambda_iouhead * loss_iou
+            # else:
+            loss = args.lambda_bbox * loss_l + loss_c + args.lambda_iouhead * loss_iou
+            
             # backprop
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-
+            loss_lm=0
             # put losses to lists to average for printing
             loss_l_epoch.append(loss_l.item())
-            loss_lm_epoch.append(loss_lm.item())
+            loss_lm_epoch.append(loss_lm)
             loss_c_epoch.append(loss_c.item())
             loss_iou_epoch.append(loss_iou.item())
             loss_epoch.append(loss.item())
@@ -177,12 +211,12 @@ def train():
                     with_landmark, epoch, max_epoch, iter_idx, num_iter_in_epoch, 
                     loss_l.item(), np.mean(loss_l_epoch),
                     loss_iou.item(), np.mean(loss_iou_epoch),
-                    loss_lm.item(), np.mean(loss_lm_epoch),
+                    loss_lm, np.mean(loss_lm_epoch),
                     loss_c.item(), np.mean(loss_c_epoch),
                     loss.item(),  np.mean(loss_epoch), lr))
 
 
-        if (epoch % 50 == 0 and epoch > 0) :
+        if (epoch % 5 == 0 and epoch > 0) :
             torch.save(net.state_dict(), args.weight_filename_prefix + '_epoch_' + str(epoch) + '.pth')
 
         #the end time

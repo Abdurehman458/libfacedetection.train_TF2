@@ -154,12 +154,16 @@ def detect_face(net, img, device, scale=1., conf_thresh=0.3):
 def save_res(dets, event, name):
     txt_name = name[:-4]+'.txt'
     save_path = os.path.join(args.res_dir, event)
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
+    # if not os.path.exists(save_path):
+    #     os.makedirs(save_path)
     
-    with open(os.path.join(save_path, txt_name), 'w') as f:
-        f.write('{}\n'.format('/'.join([event, name])))
-        f.write('{}\n'.format(dets.shape[0]))
+    # with open(os.path.join(save_path, txt_name), 'w') as f:
+    with open(os.path.join("./results",event+"_"+txt_name), 'w') as f:
+        # print(os.path.join(save_path, txt_name))
+        # print(event)
+        # exit()
+        # f.write('{}\n'.format('/'.join([event, name])))
+        # f.write('{}\n'.format(dets.shape[0]))
         for k in range(dets.shape[0]):
             xmin = dets[k, 0]
             ymin = dets[k, 1]
@@ -168,11 +172,11 @@ def save_res(dets, event, name):
             score = dets[k, 4]
             w = xmax - xmin + 1
             h = ymax - ymin + 1
-            f.write('{:.1f} {:.1f} {:.1f} {:.1f} {:.3f}\n'.format(np.floor(xmin), 
+            f.write('{} {:.2f} {} {} {} {}\n'.format("face",score,np.floor(xmin), 
                                                                   np.floor(ymin), 
-                                                                  np.ceil(w), 
-                                                                  np.ceil(h), 
-                                                                  score))
+                                                                  np.ceil(xmax), 
+                                                                  np.ceil(ymax), 
+                                                                  ))
 
 def get_available_scales(h, w, scales):
     smin = min(h, w)
@@ -245,7 +249,7 @@ if __name__ == '__main__':
     parser.add_argument('--nms_threshold', default=0.3, type=float, help='nms_threshold')
     parser.add_argument('--keep_top_k', default=750, type=int, help='keep_top_k')
     parser.add_argument('--base_layers', default=16, type=int, help='the number of the output of the first layer')
-    parser.add_argument('--device', default='cuda:1', help='which device the program will run on. cuda:0, cuda:1, ...')
+    parser.add_argument('--device', default='cuda:0', help='which device the program will run on. cuda:0, cuda:1, ...')
     args = parser.parse_args()
 
     main(args)

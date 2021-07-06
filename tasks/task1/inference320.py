@@ -98,7 +98,7 @@ if __name__ == '__main__':
     gst_str = ("filesrc location=\"/home/arm/Videos/vlc-record-2020-08-12-13h17m54s-August-04-2020-7 am-alec2-up.mkv-.mp4\" latency=0 ! decodebin ! videoconvert ! appsink")
     # cap = cv2.VideoCapture(gst_str, cv2.CAP_GSTREAMER)
     # cap = cv2.VideoCapture("/home/arm/Videos/vlc-record-2020-08-12-13h17m54s-August-04-2020-7 am-alec2-up.mkv-.mp4") #27sec
-    cap = cv2.VideoCapture("/home/arm/Videos/vlc-record-2020-08-12-13h14m54s-August-04-2020-7 am-alec2-up.mkv-.mp4")
+    cap = cv2.VideoCapture("/home/arm/Downloads/liface/v2/libfacedetection.train/tasks/task1/facetest.mp4")
     # cap = cv2.VideoCapture("filesrc location=\"/home/arm/Videos/vlc-record-2020-08-12-13h17m54s-August-04-2020-7 am-alec2-up.mkv-.mp4\"  decodebin ! videoconvert ! autovideosink",cv2.CAP_GSTREAMER)
     # cap = cv2.VideoCapture("rtspsrc location=rtsp://admin:abcd1234@10.0.0.236 latency=0 ! rtph264depay ! avdec_h264 ! videoconvert ! appsink",cv2.CAP_GSTREAMER)
 

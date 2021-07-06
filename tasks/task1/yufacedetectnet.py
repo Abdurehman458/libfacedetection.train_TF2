@@ -95,19 +95,19 @@ class YuFaceDetectNet(nn.Module):
         conf_layers = []
         iou_layers = []
 
-        loc_layers += [nn.Conv2d(self.model3.out_channels, 3 * 14, kernel_size=3, padding=1, bias=True)]
+        loc_layers += [nn.Conv2d(self.model3.out_channels, 3 * 4, kernel_size=3, padding=1, bias=True)]
         conf_layers += [nn.Conv2d(self.model3.out_channels, 3 * num_classes, kernel_size=3, padding=1, bias=True)]
         iou_layers += [nn.Conv2d(self.model3.out_channels, 3, kernel_size=3, padding=1, bias=True)]
 
-        loc_layers += [nn.Conv2d(self.model4.out_channels, 2 * 14, kernel_size=3, padding=1, bias=True)]
+        loc_layers += [nn.Conv2d(self.model4.out_channels, 2 * 4, kernel_size=3, padding=1, bias=True)]
         conf_layers += [nn.Conv2d(self.model4.out_channels, 2 * num_classes, kernel_size=3, padding=1, bias=True)]
         iou_layers += [nn.Conv2d(self.model4.out_channels, 2, kernel_size=3, padding=1, bias=True)]
 
-        loc_layers += [nn.Conv2d(self.model5.out_channels, 2 * 14, kernel_size=3, padding=1, bias=True)]
+        loc_layers += [nn.Conv2d(self.model5.out_channels, 2 * 4, kernel_size=3, padding=1, bias=True)]
         conf_layers += [nn.Conv2d(self.model5.out_channels, 2 * num_classes, kernel_size=3, padding=1, bias=True)]
         iou_layers += [nn.Conv2d(self.model5.out_channels, 2, kernel_size=3, padding=1, bias=True)]
 
-        loc_layers += [nn.Conv2d(self.model6.out_channels, 3 * 14, kernel_size=3, padding=1, bias=True)]
+        loc_layers += [nn.Conv2d(self.model6.out_channels, 3 * 4, kernel_size=3, padding=1, bias=True)]
         conf_layers += [nn.Conv2d(self.model6.out_channels, 3 * num_classes, kernel_size=3, padding=1, bias=True)]
         iou_layers += [nn.Conv2d(self.model6.out_channels, 3, kernel_size=3, padding=1, bias=True)]
 
@@ -137,6 +137,8 @@ class YuFaceDetectNet(nn.Module):
 
         x = F.max_pool2d(x, 2)
         x = self.model6(x)
+        # y =x.permute(0,2,3,1)
+        # print(y,y.shape)
         detection_sources.append(x)
 
         for (x, l, c, i) in zip(detection_sources, self.loc, self.conf, self.iou):
@@ -144,19 +146,25 @@ class YuFaceDetectNet(nn.Module):
             conf_data.append(c(x).permute(0, 2, 3, 1).contiguous())
             iou_data.append(i(x).permute(0, 2, 3, 1).contiguous())
 
-        loc_data = torch.cat([o.view(o.size(0), -1) for o in loc_data], 1)
-        conf_data = torch.cat([o.view(o.size(0), -1) for o in conf_data], 1)
-        iou_data = torch.cat([o.view(o.size(0), -1) for o in iou_data], 1)
-
+        # for o in loc_data:
+        #     print(o.size(),o.size(0))
+        #     x=o.view(o.size(0), -1)
+        #     print(x.shape)
+        #     exit()
+        loc_data = torch.cat([o.reshape(o.size(0), -1) for o in loc_data], 1)
+        conf_data = torch.cat([o.reshape(o.size(0), -1) for o in conf_data], 1)
+        iou_data = torch.cat([o.reshape(o.size(0), -1) for o in iou_data], 1)
+        # print(loc_data.shape,conf_data.shape,iou_data.shape)
         if self.phase == "test":
-          output = (loc_data.view(loc_data.size(0), -1, 14),
-                    self.softmax(conf_data.view(conf_data.size(0), -1, self.num_classes)),
-                    iou_data.view(iou_data.size(0), -1, 1))
+            output = (loc_data.reshape(loc_data.size(0), -1, 4),
+                    self.softmax(conf_data.reshape(conf_data.size(0), -1, self.num_classes)),
+                    iou_data.reshape(iou_data.size(0), -1, 1))
+            # print("Output_Layer",output[0].shape,output[1].shape,output[2].shape)
         else:
-          output = (loc_data.view(loc_data.size(0), -1, 14),
-                    conf_data.view(conf_data.size(0), -1, self.num_classes),
-                    iou_data.view(iou_data.size(0), -1, 1))
-
+            output = (loc_data.reshape(loc_data.size(0), -1, 4),
+                    conf_data.reshape(conf_data.size(0), -1, self.num_classes),
+                    iou_data.reshape(iou_data.size(0), -1, 1))
+            # print("Output_Layer",output[0].shape,output[1].shape,output[2].shape)
         return output
 
     def convert_conv_intstring(self, conv, name):
