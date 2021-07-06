@@ -42,6 +42,7 @@ parser.add_argument('--base_layers', default=16, type=int, help='the number of t
 parser.add_argument('--device', default='cuda:0', help='which device the program will run on. cuda:0, cuda:1, ...')
 args = parser.parse_args()
 
+vid_path = "/home/arm/Downloads/liface/libfacedetection.train_TF2/tf2/facetest.mp4"
 
 @tf.function
 def infer(net,img):
@@ -84,7 +85,7 @@ if __name__ == '__main__':
     
     _t = {'forward_pass': Timer(), 'misc': Timer()}
 
-    cap = cv2.VideoCapture("/home/arm/Downloads/liface/libfacedetection.train_TF2/tf2/facetest.mp4") #27sec
+    cap = cv2.VideoCapture(vid_path) #27sec
     # cap = cv2.VideoCapture("filesrc location=\"/path/to/video.mp4\"  decodebin ! videoconvert ! autovideosink",cv2.CAP_GSTREAMER)
     # cap = cv2.VideoCapture("rtspsrc location=rtsp://admin:abcd1234@10.0.0.236 latency=0 ! rtph264depay ! avdec_h264 ! videoconvert ! appsink",cv2.CAP_GSTREAMER)
 
