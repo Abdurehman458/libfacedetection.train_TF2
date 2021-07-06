@@ -46,9 +46,10 @@ _Note: Codes are based on Python 3+._
   ```
 
 ## Detection
+1. Set video directory in inference320.py on line (45):
 ```Shell
-cd $TRAIN_ROOT/tasks/task1/
-./detect.py -m weights/yunet_final.pth --image_file=filename.jpg
+cd $TRAIN_ROOT/tf2/
+python3 inference320.py 
 ```
 
 ## Evaluation on WIDER Face
