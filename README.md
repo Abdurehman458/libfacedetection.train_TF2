@@ -12,10 +12,7 @@ Visualization of our network architecture: [[netron]](https://netron.app/?url=ht
 - [Training](#training)
 - [Detection](#detection)
 - [Evaluation on WIDER Face](#evaluation-on-wider-face)
-- [Export CPP source code](#export-cpp-source-code)
-- [Export to ONNX model](#export-to-onnx-model)
-- [Design your own model](#design-your-own-model)
-- [Citation](#citation)
+
 
 ## Installation
 1. Install [PyTorch](https://pytorch.org/) >= v1.0.0 following official instruction.
@@ -87,24 +84,6 @@ Run on default settings: scales=[1.], confidence_threshold=0.3:
 ```
 AP_easy=0.852, AP_medium=0.823, AP_hard=0.646
 ```
-
-## Export CPP source code
-The following bash code can export a CPP file for project [libfacedetection](https://github.com/ShiqiYu/libfacedetection)
-```Shell
-cd $TRAIN_ROOT/tasks/task1/
-./exportcpp.py -m weights/yunet_final.pth -o output.cpp
-```
-
-## Export to onnx model
-Export to onnx model for [libfacedetection/example/opencv_dnn](https://github.com/ShiqiYu/libfacedetection/tree/master/example/opencv_dnn).
-```shell
-cd $TRAIN_ROOT/tasks/task1/
-python exportonnx.py -m weights/yunet_final.pth
-```
-
-## Design your own model
-You can copy `$TRAIN_ROOT/tasks/task1/` to `$TRAIN_ROOT/tasks/task2/` or other similar directory, and then modify the model defined in file: tasks/task2/yufacedetectnet.py .
-
 
 ## Citation
 Our paper, which introduces a novel loss named Extended IoU (EIoU), is coming out soon. We trained our model using the EIoU loss and obtained a performance boost, see [Performance on WIDER Face (Val)](#performance-on-wider-face-(val)) for details. Stay tune for the release of our paper!
