@@ -66,7 +66,6 @@ criterion = MultiBoxLoss(num_classes, 0.35, True, 0, True, 3, 0.35, False, False
 priorbox = PriorBox(cfg, image_size=(img_dim, img_dim))
 priors=priorbox.forward()
 
-# @tf.function
 def train():
 
     print('Loading Dataset...')
@@ -100,44 +99,15 @@ def train():
         # the start time
         load_t0 = time.time()
         num_iter_in_epoch = len(train_loader)
-        # asa= [0.4238,0.1666,0.6679,0.6380,1]
-        # for iter_idx, one_batch_data in enumerate(asa):
+
         for iter_idx, one_batch_data in enumerate(train_loader):
             images, targets = one_batch_data
             targets1=[]
             images=tf.convert_to_tensor(images)
-            # print(images.shape)
-            # print(targets[0])
-            # # print(targets[0])
-            # x = np.squeeze(images)
-            # print(x.shape)
-            # x = x.astype(np.uint8)
-            # # cv2.rectangle(x, ((int(targets[0][0]*320)), (int(targets[0][1]*320))),
-            # # ((int(targets[0][2]*320)), (int(targets[0][3]*320))),(0, 255, 0), 2 )
-            # cv2.imshow("as",x)
-            # if cv2.waitKey(0) & 0xFF == ord('q'):
-            #     break
-            # exit()
 
             for i in range (len(targets)):
                 tar=tf.convert_to_tensor(targets[i])
                 targets1.append(tar)
-            # print("targets1",targets1)
-
-            ###########*************************************######
-            # images = cv2.imread("/home/arm/Projects/LibFaceDetection/libfacedetection.train/tasks/task1/test1.jpg")
-            # # cv2.imshow("",images)
-            # # if cv2.waitKey(0) & 0xFF == ord('q'):
-            # #     break
-            # images = cv2.cvtColor(images,cv2.COLOR_BGR2RGB)
-            # images = images/255
-            # images = cv2.resize(images,(320,320))
-            # images = tf.convert_to_tensor(images)
-            # images = tf.expand_dims(images,axis=0)
-            # target = [0.4238,0.1666,0.6679,0.6380,1]
-            # target = tf.convert_to_tensor([target])
-            # targets1 = [target]
-            ####################**************************##########
 
             with tf.GradientTape() as tape:
                 out = net(images)
@@ -172,7 +142,7 @@ def train():
             # exit()
         if (epoch % 5 == 0 and epoch > 0) :
             net.save_weights("/home/arm/Downloads/liface/libfacedetection.train_TF2/tf2/checkpoints/adam_net.h5")
-            #net.save_weights('/home/arm/Projects/LibFaceDetection/My work/subclass/weights',overwrite=True,save_format='tf')
+            #net.save_weights('/home/arm/Downloads/liface/libfacedetection.train_TF2/tf2/subclass/weights',overwrite=True,save_format='tf')
         #the end time
         load_t1 = time.time()
         epoch_time = (load_t1 - load_t0) / 60
@@ -182,14 +152,10 @@ def train():
 def train_step(imgs, net,targets1, criterion, optimizer):
     with tf.GradientTape() as tape:
         out = net(imgs)
-        # print(out)
-        # exit()
         loss_l, loss_c, loss_iou = criterion.forward(out, priors, targets1)
         loss = lambda_bbox * loss_l + loss_c + lambda_iouhead * loss_iou
-        # print(loss)
+        
     gradients=tape.gradient(loss, net.trainable_variables)
-    # print(gradients)
-    # exit()
     optimizer.apply_gradients(zip(gradients,net.trainable_variables))
     
     return loss, loss_l, loss_c, loss_iou

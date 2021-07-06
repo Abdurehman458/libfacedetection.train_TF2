@@ -41,7 +41,7 @@ _Note: Codes are based on Python 3+._
   ```
 2. Train the model using WIDER FACE:
   ```Shell
-  cd $TRAIN_ROOT/tasks/task1/
+  cd $TRAIN_ROOT/tf2
   python3 train.py
   ```
 

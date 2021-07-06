@@ -77,50 +77,19 @@ if __name__ == '__main__':
     
     # print("Printing net...")
     # print(net.weights)
-    # exit()
-
     # net.summary()
 
-    """############   trt conversion  #############################"""
-    # from tensorflow.python.compiler.tensorrt import trt_convert as trt
-    # converter = trt.TrtGraphConverterV2(input_saved_model_dir="/home/arm/Projects/LibFaceDetection/My work/saved_model")
-    # converter.convert()
-    # converter.save("/home/arm/Projects/LibFaceDetection/My work/trt")
-    # print('Converting to TF-TRT FP32...')
-    # conversion_params = trt.DEFAULT_TRT_CONVERSION_PARAMS._replace(
-    # precision_mode=trt.TrtPrecisionMode.FP16,
-    # max_workspace_size_bytes=8000000000)
-
-    # converter = trt.TrtGraphConverterV2(input_saved_model_dir='/home/arm/Projects/LibFaceDetection/My work/saved_model',
-    #                                     conversion_params=conversion_params)
-    # converter.convert()
-    # converter.save(output_saved_model_dir='/home/arm/Projects/LibFaceDetection/My work/trt')
-    # print('Done Converting to TF-TRT FP32')
-
-    # params = tf.experimental.tensorrt.ConversionParams(
-    # precision_mode='FP16')
-    # converter = tf.experimental.tensorrt.Converter(
-    #     input_saved_model_dir="/home/arm/Projects/LibFaceDetection/My work/saved_model", conversion_params=params)
-    # converter.convert()
-    # converter.save("/home/arm/Projects/LibFaceDetection/My work/trt")
-    """################################################################"""
 
     print('Finished loading model!')
     
     _t = {'forward_pass': Timer(), 'misc': Timer()}
-    # gst_str = ("filesrc location=\"/home/arm/Videos/vlc-record-2020-08-12-13h17m54s-August-04-2020-7 am-alec2-up.mkv-.mp4\" latency=0 ! decodebin ! videoconvert ! appsink")
-    # cap = cv2.VideoCapture(gst_str, cv2.CAP_GSTREAMER)
-    cap = cv2.VideoCapture("/home/arm/Downloads/liface/v2/My work/classroom.mp4") #27sec
-    # cap = cv2.VideoCapture("/home/arm/Videos/vlc-record-2020-08-12-13h14m54s-August-04-2020-7 am-alec2-up.mkv-.mp4")
-    # cap = cv2.VideoCapture("filesrc location=\"/home/arm/Videos/vlc-record-2020-08-12-13h17m54s-August-04-2020-7 am-alec2-up.mkv-.mp4\"  decodebin ! videoconvert ! autovideosink",cv2.CAP_GSTREAMER)
+
+    cap = cv2.VideoCapture("/home/arm/Downloads/liface/libfacedetection.train_TF2/tf2/facetest.mp4") #27sec
+    # cap = cv2.VideoCapture("filesrc location=\"/path/to/video.mp4\"  decodebin ! videoconvert ! autovideosink",cv2.CAP_GSTREAMER)
     # cap = cv2.VideoCapture("rtspsrc location=rtsp://admin:abcd1234@10.0.0.236 latency=0 ! rtph264depay ! avdec_h264 ! videoconvert ! appsink",cv2.CAP_GSTREAMER)
 
     (grabbed, frame) = cap.read()
     im_height1, im_width1, _ = frame.shape
-
-    # fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    # out = cv2.VideoWriter('inference.avi',fourcc, 30.0, (im_width1,im_height1))
-    # testing begin
 
     # used to record the time when we processed last frame 
     prev_frame_time = 0
@@ -146,30 +115,17 @@ if __name__ == '__main__':
         ret, img_raw = cap.read()
         
         if ret:
-    # img_raw = cv2.imread(args.image_file, cv2.IMREAD_COLOR)
-            # stime=time.time()
             img = cv2.resize(img_raw,(im_width, im_height))
-            # img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
-            # img = img/127 
             img = tf.convert_to_tensor(img,dtype="float32")
-            # img -= (104, 117, 123) 
             img = img[tf.newaxis, ...]
             preproc_end = time.time()
-            # img = np.expand_dims(img,axis=0)
-            #img -= (104, 117, 123)  
-            # img = img.transpose(2, 0, 1) #(3, 720, 1280)
-            # print((time.time()-stime)*1000)
-            
-            # img = torch.from_numpy(img).unsqueeze(0) #torch.Size([1, 3, 720, 1280])
             print("preproc:",(preproc_end-preproc_start)*1000)
 
             _t['forward_pass'].tic()
-            # loc, conf, iou = net(img)  # forward pass
+
             loc, conf, iou = infer(net,img)  # forward pass
             print("Inference_Time",_t['forward_pass'].toc()*1000)
             
-            # print(conf)
-            # exit()
             _t['misc'].tic()
 
             prior_data = priors
