@@ -42,7 +42,7 @@ parser.add_argument('--base_layers', default=16, type=int, help='the number of t
 parser.add_argument('--device', default='cuda:0', help='which device the program will run on. cuda:0, cuda:1, ...')
 args = parser.parse_args()
 
-vid_path = "/home/arm/Downloads/liface/libfacedetection.train_TF2/tf2/facetest.mp4"
+vid_path = "facetest.mp4"
 
 @tf.function
 def infer(net,img):
@@ -56,7 +56,7 @@ if __name__ == '__main__':
     """### Keras functional model"""
 
     net = YuFaceDetectNet1('train', (180,320,3))   # use this model for SAVEDMODEL conversion. Subclassed model converted to SAVEDMODEL format doesnt work well
-    net.load_weights("/home/arm/Downloads/liface/libfacedetection.train_TF2/tf2/checkpoints/adam_net.h5")
+    net.load_weights("checkpoints/adam_net.h5")
     
     """for conversion to SAVED MODEL run these along with above 2 lines"""
 

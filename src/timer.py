@@ -22,7 +22,7 @@ class Timer(object):
         # does not normalize for multithreading
         self.start_time = time.time()
 
-    def toc(self, average=True):
+    def toc(self, average=False):
         self.diff = time.time() - self.start_time
         self.total_time += self.diff
         self.calls += 1

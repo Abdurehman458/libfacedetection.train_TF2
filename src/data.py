@@ -254,7 +254,7 @@ class AnnotationTransform(object):
         Returns:
             a list containing lists of bounding boxes  [bbox coords, class name]
         """
-        res = np.empty((0, 15))
+        res = np.empty((0, 5))
         for obj in target.iter('object'):
             difficult = int(obj.find('difficult').text) == 1
             if not self.keep_difficult and difficult:
@@ -271,15 +271,15 @@ class AnnotationTransform(object):
                 bndbox.append(cur_pt)
 
             # get face landmark
-            if int(obj.find('has_lm').text.strip()) == 1:
-                lm = obj.find('lm')
-                pts = ['x1', 'y1', 'x2', 'y2', 'x3', 'y3', 'x4', 'y4', 'x5', 'y5']
-                for i, pt in enumerate(pts):
-                    xy_value = float(lm.find(pt).text)
-                    bndbox.append(xy_value)
-            else:  # append 10 zeros
-                for i in range(10):
-                    bndbox.append(0)
+            # if int(obj.find('has_lm').text.strip()) == 1:
+            #     lm = obj.find('lm')
+            #     pts = ['x1', 'y1', 'x2', 'y2', 'x3', 'y3', 'x4', 'y4', 'x5', 'y5']
+            #     for i, pt in enumerate(pts):
+            #         xy_value = float(lm.find(pt).text)
+            #         bndbox.append(xy_value)
+            # else:  # append 10 zeros
+            #     for i in range(10):
+            #         bndbox.append(0)
 
             # label 0 or 1 (bk or face)
             label_idx = self.class_to_ind[name]

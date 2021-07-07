@@ -119,6 +119,7 @@ def match(threshold, truths, priors, variances, labels, loc_t, conf_t, idx):
     )
     # (Bipartite Matching)
     # [1,num_objects] best prior for each ground truth
+    # print(overlaps.shape)
     best_prior_overlap, best_prior_idx = overlaps.max(1, keepdim=True)
 
     # ignore hard gt
@@ -136,14 +137,28 @@ def match(threshold, truths, priors, variances, labels, loc_t, conf_t, idx):
     best_prior_idx.squeeze_(1)
     best_prior_idx_filter.squeeze_(1)
     best_prior_overlap.squeeze_(1)
+    # print(best_truth_overlap)
+    # print("filter",best_prior_idx_filter)
     best_truth_overlap.index_fill_(0, best_prior_idx_filter, 2)  # ensure best prior
+    # exit()
+    # best_truth_overlap[best_prior_idx_filter]=2
+    # print(torch.eq(x, y))
+    # print(torch.sum(torch.eq(x, y)).item()/x.nelement())
+    # print("\n",best_truth_overlap.shape)
+    # exit()
     # TODO refactor: index  best_prior_idx with long tensor
     # ensure every gt matches with its prior of max overlap
     for j in range(best_prior_idx.size(0)):
         best_truth_idx[best_prior_idx[j]] = j
     matches = truths[best_truth_idx]          # Shape: [num_priors,14]
     conf = labels[best_truth_idx]          # Shape: [num_priors]
+    # print("conf",conf)
+    # print((conf==0).nonzero())
+    # exit()
     conf[best_truth_overlap < threshold] = 0  # label as background
+    # print("conf",conf)
+    # print((conf==1).nonzero())
+    # exit()
     loc = encode(matches, priors, variances)
     loc_t[idx] = loc    # [num_priors,14] encoded offsets to learn
     conf_t[idx] = conf  # [num_priors] top class label for each prior
@@ -173,14 +188,15 @@ def encode(matched, priors, variances):
     g_wh = torch.log(g_wh) / variances[1]
 
     # landmarks
-    g_xy1 = (matched[:, 4:6] - priors[:, 0:2]) / (variances[0] * priors[:, 2:4])
-    g_xy2 = (matched[:, 6:8] - priors[:, 0:2]) / (variances[0] * priors[:, 2:4])
-    g_xy3 = (matched[:, 8:10] - priors[:, 0:2]) / (variances[0] * priors[:, 2:4])
-    g_xy4 = (matched[:, 10:12] - priors[:, 0:2]) / (variances[0] * priors[:, 2:4])
-    g_xy5 = (matched[:, 12:14] - priors[:, 0:2]) / (variances[0] * priors[:, 2:4])
+    # g_xy1 = (matched[:, 4:6] - priors[:, 0:2]) / (variances[0] * priors[:, 2:4])
+    # g_xy2 = (matched[:, 6:8] - priors[:, 0:2]) / (variances[0] * priors[:, 2:4])
+    # g_xy3 = (matched[:, 8:10] - priors[:, 0:2]) / (variances[0] * priors[:, 2:4])
+    # g_xy4 = (matched[:, 10:12] - priors[:, 0:2]) / (variances[0] * priors[:, 2:4])
+    # g_xy5 = (matched[:, 12:14] - priors[:, 0:2]) / (variances[0] * priors[:, 2:4])
 
     # return target for loss
-    return torch.cat([g_cxcy, g_wh, g_xy1, g_xy2, g_xy3, g_xy4, g_xy5], 1)  # [num_priors,14]
+    # return torch.cat([g_cxcy, g_wh, g_xy1, g_xy2, g_xy3, g_xy4, g_xy5], 1)  # [num_priors,14]
+    return torch.cat([g_cxcy, g_wh], 1)  # [num_priors,14]
 
 
 # Adapted from https://github.com/Hakuyume/chainer-ssd
@@ -198,12 +214,12 @@ def decode(loc, priors, variances):
     """
     boxes = torch.cat((
         priors[:, 0:2] + loc[:, 0:2] * variances[0] * priors[:, 2:4],
-        priors[:, 2:4] * torch.exp(loc[:, 2:4] * variances[1]),
-        priors[:, 0:2] + loc[:, 4:6] * variances[0] * priors[:, 2:4],
-        priors[:, 0:2] + loc[:, 6:8] * variances[0] * priors[:, 2:4],
-        priors[:, 0:2] + loc[:, 8:10] * variances[0] * priors[:, 2:4],
-        priors[:, 0:2] + loc[:, 10:12] * variances[0] * priors[:, 2:4],
-        priors[:, 0:2] + loc[:, 12:14] * variances[0] * priors[:, 2:4]), 1)
+        priors[:, 2:4] * torch.exp(loc[:, 2:4] * variances[1])),1)
+        # priors[:, 0:2] + loc[:, 4:6] * variances[0] * priors[:, 2:4],
+        # priors[:, 0:2] + loc[:, 6:8] * variances[0] * priors[:, 2:4],
+        # priors[:, 0:2] + loc[:, 8:10] * variances[0] * priors[:, 2:4],
+        # priors[:, 0:2] + loc[:, 10:12] * variances[0] * priors[:, 2:4],
+        # priors[:, 0:2] + loc[:, 12:14] * variances[0] * priors[:, 2:4]), 1)
     boxes[:, 0:2] -= boxes[:, 2:4] / 2
     boxes[:, 2:4] += boxes[:, 0:2]
     return boxes
@@ -217,6 +233,9 @@ def log_sum_exp(x):
         x (Variable(tensor)): conf_preds from conf layers
     """
     x_max = x.data.max()
+    # print("xmax",x_max)
+    # print("sum",torch.sum(torch.exp(x-x_max), 1, keepdim=True))
+    # print("log",torch.log(torch.sum(torch.exp(x-x_max), 1, keepdim=True)))
     return torch.log(torch.sum(torch.exp(x-x_max), 1, keepdim=True)) + x_max
 
 

@@ -38,16 +38,21 @@ class PriorBox(object):
         anchors = []
         for k, f in enumerate(self.feature_maps):
             min_sizes = self.min_sizes[k]
+            # print(f)
             for i, j in product(range(f[0]), range(f[1])):
+                # print(i,j)
+                # exit()
                 for min_size in min_sizes:
                     s_kx = min_size / self.image_size[1]
                     s_ky = min_size / self.image_size[0]
-
+                    
                     cx = (j + 0.5) * self.steps[k] / self.image_size[1]
                     cy = (i + 0.5) * self.steps[k] / self.image_size[0]
+                    # print(cx,cy)
                     anchors += [cx, cy, s_kx, s_ky]
         # back to torch land
         output = torch.Tensor(anchors).view(-1, 4)
+        # print(output)
         if self.clip:
             output.clamp_(max=1, min=0)
         return output

@@ -59,20 +59,41 @@ class MultiBoxLoss(nn.Module):
         """
 
         loc_data, conf_data, iou_data = predictions
+        # print(loc_data)
+        # print(conf_data)
+        # print(iou_data)
+        # exit()
         priors = priors
         num = loc_data.size(0)
         num_priors = (priors.size(0))
 
         # match priors (default boxes) and ground truth boxes
-        loc_t = torch.Tensor(num, num_priors, 14)
+        loc_t = torch.Tensor(num, num_priors, 4)
         conf_t = torch.LongTensor(num, num_priors)
         iou_t = torch.Tensor(num, num_priors)
         for idx in range(num):
-            truths = targets[idx][:, 0:14].data
+            truths = targets[idx][:, 0:4].data
             labels = targets[idx][:, -1].data
+            # print("truths",truths)
+            # print("labels",labels)
             defaults = priors.data
+            # exit()
             iou_t[idx] = match(self.threshold, truths, defaults, self.variance, labels, loc_t, conf_t, idx)
+            # print(iou_t[idx],iou_t[idx].shape)
+            # exit()
         iou_t = iou_t.view(num, num_priors, 1)
+        # print(iou_t,iou_t.shape)
+        # exit()
+        # print(iou_t,iou_t.shape)
+        # a =0
+        # for x in range(iou_t.shape[1]):
+        #     if iou_t[:,x,:].numpy() > 0:
+        #         a +=1
+        #         if iou_t[:,x,:].numpy() >= 2:
+        #             print(iou_t[:,x,:].numpy(),x)
+        # print(a)
+        # print ((iou_t == 2).nonzero())
+        # exit()
         if GPU:
             device = priors.get_device()
             loc_t = loc_t.cuda(device)
@@ -80,15 +101,17 @@ class MultiBoxLoss(nn.Module):
             iou_t = iou_t.cuda(device)
 
         pos = conf_t > 0
-
+        # print(pos.shape)
+        # print ((conf_t == 1).nonzero())
+        # print ((pos == True).nonzero())
+        # exit()
         # Localization Loss
         # Shape: [batch,num_priors,4]
         pos_idx = pos.unsqueeze(pos.dim()).expand_as(loc_data)
-        loc_p = loc_data[pos_idx].view(-1, 14)
-        loc_t = loc_t[pos_idx].view(-1, 14)
+        loc_p = loc_data[pos_idx].view(-1, 4)
+        loc_t = loc_t[pos_idx].view(-1, 4)
         loss_l = eiou_loss(loc_p[:, 0:4], loc_t[:, 0:4], variance=self.variance, smooth_point=self.smooth_point, reduction='sum')
-        loss_lm = F.smooth_l1_loss(loc_p[:, 4:14], loc_t[:, 4:14], reduction='sum')
-
+        # loss_lm = F.smooth_l1_loss(loc_p[:, 4:14], loc_t[:, 4:14], reduction='sum')
         # IoU diff
         pos_idx_ = pos.unsqueeze(pos.dim()).expand_as(iou_data)
         iou_p = iou_data[pos_idx_].view(-1, 1)
@@ -97,11 +120,16 @@ class MultiBoxLoss(nn.Module):
 
         # Compute max conf across batch for hard negative mining
         batch_conf = conf_data.view(-1, self.num_classes)
+        # print(batch_conf.gather(1, conf_t.view(-1, 1)))
+        # exit()
         loss_c = log_sum_exp(batch_conf) - batch_conf.gather(1, conf_t.view(-1, 1))
-
+        # print(loss_c,loss_c.shape)
+        # exit()
         # Hard Negative Mining
+        # print("pos_r",pos.view(-1, 1).shape)
         loss_c[pos.view(-1, 1)] = 0 # filter out pos boxes for now
         loss_c = loss_c.view(num, -1)
+        
         _, loss_idx = loss_c.sort(1, descending=True)
         _, idx_rank = loss_idx.sort(1)
         num_pos = pos.long().sum(1, keepdim=True)
@@ -118,8 +146,8 @@ class MultiBoxLoss(nn.Module):
         # Sum of losses
         N = max(num_pos.data.sum().float(), 1)
         loss_l /= N
-        loss_lm /= N
+        # loss_lm /= N
         loss_c /= N
         loss_iou /= N
-
-        return loss_l, loss_lm, loss_c, loss_iou
+        # return loss_l, loss_lm, loss_c, loss_iou
+        return loss_l, loss_c, loss_iou
