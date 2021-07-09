@@ -107,9 +107,6 @@ def train():
     print('Loading Dataset...')
     dataset_rect = FaceRectLMDataset(training_face_rect_dir, img_dim, rgb_mean)
     # dataset_landmark = FaceRectLMDataset(training_face_landmark_dir, img_dim, rgb_mean)
-    # img = dataset_rect[0]
-    # print(img[0].shape)
-    # exit()
     batch_size = args.batch_size
 
     for epoch in range(args.resume_epoch, max_epoch):
@@ -150,41 +147,12 @@ def train():
             # load train data
             #images, targets = next(batch_iterator)
             images, targets = one_batch_data
-            # print(targets[0])
-            # print(targets[0][0][0])
-            # exit()
-            # x = images.numpy()
-            # print(x.shape)
-            # x = np.squeeze(x)
-            # print(x.shape)
-            # x = x.astype(np.uint8)
-            # x = np.transpose(x, (1, 2, 0))
-            # print(x.shape)
-            # cv2.imshow("as",x)
-            # if cv2.waitKey(0) & 0xFF == ord('q'):
-            #     break
-
-            ##*******************************##
-            # images = cv2.imread("/home/arm/Projects/LibFaceDetection/libfacedetection.train/tasks/task1/test1.jpg")
-            # # cv2.imshow("",images)
-            # # if cv2.waitKey(0) & 0xFF == ord('q'):
-            # #     break
-            # images=images/255
-            # images = cv2.resize(images,(320,320))
-            # images = torch.from_numpy(images)
-            # images = images.permute(2, 0, 1).unsqueeze(0)
-            # target = [0.4238,0.1666,0.6679,0.6380,1]
-            # target = torch.Tensor([target])
-            # targets = [target]
-            ##*********************************##
-
             images = images.to(device,dtype=torch.float)    
             targets = [anno.to(device) for anno in targets]
 
             # forward
             out = net(images)
-            # print(out)
-            # exit()
+
             # loss
             loss_l, loss_c, loss_iou = criterion(out, priors, targets)
 

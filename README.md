@@ -58,9 +58,9 @@ python3 inference320.py
 cd $TRAIN_ROOT/tasks/task1/
 ```
 
-2. Create a symbolic link to WIDER Face. `$WIDERFACE` is the path to WIDER Face dataset, which contains `wider_face_split/`, `WIDER_val`, etc.
+2. Create a symbolic link to WIDER Face. `$WIDERFACE` is the path to WIDER Face dataset, which contains `wider_face_split/`, `WIDER_val`, `images`(from WIDER_VAL) folder  etc. for example:
 ```shell
-ln -s $WIDERFACE widerface
+ln -s /path/to/widerface/ widerface
 ```
 
 3. Perform evaluation. To reproduce the following performance, run on the default settings. Run `python test.py --help` for more options.

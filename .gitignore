@@ -7,3 +7,7 @@
 **/.vscode/**
 **.mp4
 **/data/WIDER_FACE_rect/images/**
+**/data/WIDER_val/**
+**/data/widerface/**
+**/tasks/task1/results/**
+**/tasks/task1/widerface**
