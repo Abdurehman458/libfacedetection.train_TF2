@@ -69,7 +69,7 @@ mkdir results
 python test.py
 ```
 
-4. Download and run the [official evaluation tools](http://shuoyang1213.me/WIDERFACE/support/eval_script/eval_tools.zip). ***NOTE***: Matlab required!
+4. Download and run the [official evaluation tools](http://shuoyang1213.me/WIDERFACE/support/eval_script/eval_tools.zip). ***NOTE***: Matlab required! OR skip this step if you dont have MATLAB and follow alternate step 5 to calculate mAP. 
 ```shell
 # download
 wget http://shuoyang1213.me/WIDERFACE/support/eval_script/eval_tools.zip
@@ -80,6 +80,8 @@ cd eval_tools
 vim wider_eval.m # modify line 10 and line 21 according to your case
 matlab -nodesktop -nosplash -r "run wider_eval.m;quit;"
 ```
+
+5. First run these two scripts in the given order:
 
 ### Performance on WIDER Face (Val)
 Run on default settings: scales=[1.], confidence_threshold=0.3:
