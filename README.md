@@ -82,7 +82,16 @@ matlab -nodesktop -nosplash -r "run wider_eval.m;quit;"
 ```
 
 5. First run these two scripts in the given order:
-
+```shell
+# cd to mAP folder
+# run gen_txt.py and select type pt for pytorch and tf for tensorflow results
+python gen_txt.py --type pt
+# or
+python gen_txt.py --type tf
+# run read_txt.py to copy .xml files from annotations folder
+python read_txt.py
+# Now change dir to scripts folder
+```
 ### Performance on WIDER Face (Val)
 Run on default settings: scales=[1.], confidence_threshold=0.3:
 ```
