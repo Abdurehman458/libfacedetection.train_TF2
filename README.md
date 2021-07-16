@@ -91,6 +91,9 @@ python gen_txt.py --type tf
 # run read_txt.py to copy .xml files from annotations folder
 python read_txt.py
 # Now change dir to scripts folder
+cd mAP/scripts/extra
+#run xml conversion script
+python convert_gt_xml.py
 ```
 ### Performance on WIDER Face (Val)
 Run on default settings: scales=[1.], confidence_threshold=0.3:
