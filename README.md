@@ -99,7 +99,7 @@ python main.py
 ### Performance on WIDER Face (Val)
 Run on default settings: scales=[1.], confidence_threshold=0.3:
 ```
-AP_easy=0.852, AP_medium=0.823, AP_hard=0.646
+mAP_tf2=0.659, mAP_torch=0.72
 ```
 
 ## Citation
