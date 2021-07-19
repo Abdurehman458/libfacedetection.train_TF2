@@ -1,4 +1,3 @@
-# Under progress. (cannot guarantee working repo)
 # Training for libfacedetection in TensorFlow 2
 
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
