@@ -27,6 +27,7 @@ from nms import nms
 from utils import decode
 from timer import Timer
 from yufacedetectnet import YuFaceDetectNet
+from yufacedetectnet1 import YuFaceDetectNet1
 
 from tqdm import tqdm
 from datasets import WIDERFace
@@ -212,7 +213,7 @@ def main(args):
     # if device.type == 'cuda':
     #     cudnn.benchmark = True
     #     net = net.to(device)
-    net.load_weights("/home/arm/Projects/LibFaceDetection/My work/subclass/weights")
+    net.load_weights("subclass/weights")
     print('Finished loading model!')
 
     # init data loader for WIDER Face

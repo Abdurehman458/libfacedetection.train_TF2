@@ -84,10 +84,10 @@ matlab -nodesktop -nosplash -r "run wider_eval.m;quit;"
 5. First run these two scripts in the given order:
 ```shell
 # cd to mAP folder
-# run gen_txt.py and select type pt for pytorch and tf for tensorflow results
-python gen_txt.py --type pt
+# run gen_txt.py and select type pt for pytorch and tf for tensorflow results. Also add path to the repo.
+python gen_txt.py --type pt --path /path/to/libfacedetection.train_TF2
 # or
-python gen_txt.py --type tf
+python gen_txt.py --type tf --path /path/to/libfacedetection.train_TF2
 # run read_txt.py to copy .xml files from annotations folder
 python read_txt.py
 # Now change dir to scripts folder

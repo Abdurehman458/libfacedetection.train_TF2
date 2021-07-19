@@ -41,13 +41,13 @@ training_face_rect_dir = "/home/arm/Downloads/liface/libfacedetection.train_TF2/
 
 """#Functional Model"""
 
-net = YuFaceDetectNet1('train', (320,320,3)) 
-net.load_weights("checkpoints/adam_net.h5")
+# net = YuFaceDetectNet1('train', (320,320,3)) 
+# net.load_weights("checkpoints/adam_net.h5")
 
 """#Subclassed Model"""
 
-# net = YuFaceDetectNet('train', (320,320,3))
-# net.load_weights("/home/arm/Projects/LibFaceDetection/My work/subclass/weights")
+net = YuFaceDetectNet('train', (320,320,3))
+# net.load_weights("subclass/weights")
 
 net.build((16,320,320,3))
 # net.summary()
@@ -142,8 +142,8 @@ def train():
                 # print(optimizer._decayed_lr('float32').numpy())
             # exit()
         if (epoch % 5 == 0 and epoch > 0) :
-            net.save_weights("checkpoints/adam_net.h5")
-            #net.save_weights('subclass/weights',overwrite=True,save_format='tf')
+            # net.save_weights("checkpoints/adam_net.h5")
+            net.save_weights('subclass/weights',overwrite=True,save_format='tf')
         #the end time
         load_t1 = time.time()
         epoch_time = (load_t1 - load_t0) / 60

@@ -55,8 +55,8 @@ if __name__ == '__main__':
    
     """### Keras functional model"""
 
-    net = YuFaceDetectNet1('train', (180,320,3))   # use this model for SAVEDMODEL conversion. Subclassed model converted to SAVEDMODEL format doesnt work well
-    net.load_weights("checkpoints/adam_net.h5")
+    # net = YuFaceDetectNet1('train', (180,320,3))   # use this model for SAVEDMODEL conversion. Subclassed model converted to SAVEDMODEL format doesnt work well
+    # net.load_weights("checkpoints/adam_net.h5")
     
     """for conversion to SAVED MODEL run these along with above 2 lines"""
 
@@ -68,8 +68,8 @@ if __name__ == '__main__':
 
     """###Subclassed Model"""
  
-    # net = YuFaceDetectNet("test", (320,320,3))
-    # net.load_weights("/home/arm/Projects/LibFaceDetection/My work/subclass/weights")
+    net = YuFaceDetectNet("test", (320,320,3))
+    net.load_weights("subclass/weights")
     
     """#loading Saved model / TRT (TF-TRT conversion) model"""
 
@@ -135,7 +135,7 @@ if __name__ == '__main__':
 
             cls_scores = tf.squeeze(conf,axis=0).numpy()[:, 1]
 
-            """ use these 2 lines if using functional/ SAVEDMODEL"""
+            """ use these 2 lines if using functional """
             # cls_scores = tf.keras.layers.Softmax(axis=-1)(conf)
             # cls_scores = tf.squeeze(cls_scores,axis=0).numpy()[:, 1]
             
